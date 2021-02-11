@@ -4,7 +4,12 @@ import "net/http"
 
 // GetUser -
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Get User."))
+	w.Write([]byte("Get Users."))
+}
+
+// GetUserByID -
+func GetUserByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Get User by ID."))
 }
 
 // CreateUser -
