@@ -17,5 +17,24 @@ func NewRepositoryUsers(db *sql.DB) *Users {
 
 // Create new user into DB
 func (u Users) Create(user models.User) (uint64, error) {
-	return 0, nil
+	query := `INSERT INTO users (name, nick, email, password) values (?, ?, ?, ?);`
+
+	resp, err := u.db.Prepare(query)
+	if err != nil {
+		return 0, nil
+	}
+
+	defer resp.Close()
+
+	result, err := resp.Exec(user.Name, user.Nick, user.Email, user.Password)
+	if err != nil {
+		return 0, nil
+	}
+
+	lastID, err := result.LastInsertId()
+	if err != nil {
+		return 0, nil
+	}
+
+	return uint64(lastID), nil
 }

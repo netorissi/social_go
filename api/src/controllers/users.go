@@ -5,6 +5,7 @@ import (
 	"api/src/models"
 	"api/src/repositories"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -23,7 +24,6 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 // CreateUser -
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	req, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,13 +35,19 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db, err := database.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
+	userRepository := repositories.NewRepositoryUsers(db)
+
+	insertID, err := userRepository.Create(user)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userRepository := repositories.NewRepositoryUsers(db)
-	userRepository.Create(user)
+	w.Write([]byte(fmt.Sprintf("UserID: %d", insertID)))
 }
 
 // UpdateUser -
