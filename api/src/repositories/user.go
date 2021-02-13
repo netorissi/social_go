@@ -78,3 +78,68 @@ func (u Users) Find(param string) ([]models.User, error) {
 
 	return users, nil
 }
+
+// FindByID user
+func (u Users) FindByID(ID uint64) (models.User, error) {
+
+	query := `
+		SELECT id, name, nick, email, create_at 
+		FROM users
+		WHERE id = ?;
+	`
+
+	resp, err := u.db.Query(query, ID)
+	if err != nil {
+		return models.User{}, nil
+	}
+
+	defer resp.Close()
+
+	var user models.User
+
+	if resp.Next() {
+
+		if err = resp.Scan(
+			&user.ID,
+			&user.Name,
+			&user.Nick,
+			&user.Email,
+			&user.CreateAt,
+		); err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}
+
+// FindByEmail user
+func (u Users) FindByEmail(email string) (models.User, error) {
+
+	query := `
+		SELECT id, password 
+		FROM users
+		WHERE email = ?;
+	`
+
+	resp, err := u.db.Query(query, email)
+	if err != nil {
+		return models.User{}, nil
+	}
+
+	defer resp.Close()
+
+	var user models.User
+
+	if resp.Next() {
+
+		if err = resp.Scan(
+			&user.ID,
+			&user.Password,
+		); err != nil {
+			return models.User{}, err
+		}
+	}
+
+	return user, nil
+}

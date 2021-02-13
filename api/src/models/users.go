@@ -1,6 +1,7 @@
 package models
 
 import (
+	"api/src/auth"
 	"errors"
 	"strings"
 	"time"
@@ -20,6 +21,21 @@ type User struct {
 func (u *User) BeforeSave() (err error) {
 	u.format()
 	err = u.validate()
+	return err
+}
+
+// BeforeCreate validate fields before create into DB
+func (u *User) BeforeCreate() (err error) {
+	if err = u.BeforeSave(); err != nil {
+		return err
+	}
+
+	var hash []byte
+	hash, err = auth.Hash(u.Password)
+	if err == nil {
+		u.Password = string(hash)
+	}
+
 	return err
 }
 

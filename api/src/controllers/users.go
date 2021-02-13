@@ -8,11 +8,14 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
-// GetUser -
-func GetUser(w http.ResponseWriter, r *http.Request) {
+// GetUsers -
+func GetUsers(w http.ResponseWriter, r *http.Request) {
 	param := strings.ToLower(r.URL.Query().Get("search"))
 
 	db, err := database.Init()
@@ -35,7 +38,30 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByID -
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Get User by ID."))
+	params := mux.Vars(r)
+
+	userID, err := strconv.ParseUint(params["id"], 10, 64)
+	if err != nil {
+		utils.AppError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	db, err := database.Init()
+	if err != nil {
+		utils.AppError(w, http.StatusInternalServerError, err)
+		return
+	}
+	defer db.Close()
+
+	userRepository := repositories.NewRepositoryUsers(db)
+
+	user, err := userRepository.FindByID(userID)
+	if err != nil {
+		utils.AppError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.JSON(w, http.StatusOK, user)
 }
 
 // CreateUser -
@@ -53,7 +79,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = user.BeforeSave(); err != nil {
+	if err = user.BeforeCreate(); err != nil {
 		utils.AppError(w, http.StatusBadRequest, err)
 		return
 	}

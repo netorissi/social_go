@@ -12,6 +12,7 @@ import (
 var (
 	DBConnetion = ""
 	APIPort     = 0
+	SecretKey   []byte
 )
 
 func Init() {
@@ -24,6 +25,8 @@ func Init() {
 	if num, err := strconv.Atoi(os.Getenv("API_PORT")); err == nil {
 		APIPort = num
 	}
+
+	SecretKey = []byte(os.Getenv("SECRET"))
 
 	// load url connection bd
 	user := os.Getenv("DB_USER")
